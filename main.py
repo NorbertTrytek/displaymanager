@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 from tkinter import ttk, messagebox
 from screeninfo import get_monitors
@@ -18,7 +19,6 @@ def get_window_titles():
 
 
 def rect_intersection_area(r1, r2):
-    # r1, r2 = (x, y, width, height)
     x1 = max(r1[0], r2[0])
     y1 = max(r1[1], r2[1])
     x2 = min(r1[0] + r1[2], r2[0] + r2[2])
@@ -67,17 +67,21 @@ class DisplayManagerApp(tk.Tk):
         self.filter_entry.grid(row=3, column=0, sticky='ew', padx=10, pady=(0, 5))
         self.filter_entry.bind('<KeyRelease>', lambda e: self.update_window_list())
 
-        frame_listbox = tk.Frame(self)
-        frame_listbox.grid(row=4, column=0, sticky='nsew', padx=10)
-        scrollbar = tk.Scrollbar(frame_listbox, orient=tk.VERTICAL)
-        self.listbox_windows = tk.Listbox(frame_listbox, yscrollcommand=scrollbar.set)
-        scrollbar.config(command=self.listbox_windows.yview)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.listbox_windows.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        # Tabela z dwoma kolumnami: Okno | Monitor
+        self.tree = ttk.Treeview(self, columns=("window", "monitor"), show='headings', selectmode='browse')
+        self.tree.heading("window", text="Okno")
+        self.tree.heading("monitor", text="Monitor")
+        self.tree.column("window", anchor="w", width=400)
+        self.tree.column("monitor", anchor="w", width=250)
+        self.tree.grid(row=4, column=0, sticky='nsew', padx=10, pady=5)
+
+        scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
+        scrollbar.grid(row=4, column=1, sticky='ns')
+        self.tree.configure(yscrollcommand=scrollbar.set)
 
         button_frame = tk.Frame(self)
         button_frame.grid(row=5, column=0, sticky='ew', padx=10, pady=10)
-        button_frame.columnconfigure((0, 1, 2), weight=1)
+        button_frame.columnconfigure((0, 1, 2), weight=1)  # Zmieniono na 3 kolumny
 
         refresh_button = tk.Button(button_frame, text="Odśwież listę okien", command=self.update_window_list)
         refresh_button.grid(row=0, column=0, sticky='ew', padx=(0, 5))
@@ -106,56 +110,72 @@ class DisplayManagerApp(tk.Tk):
         self.windows_list = get_window_titles()
         self.filtered_windows_list = self.filter_windows(filter_text, self.windows_list)
 
-        self.listbox_windows.delete(0, tk.END)
+        self.tree.delete(*self.tree.get_children())
+
         selected_index = None
         for idx, w in enumerate(self.filtered_windows_list):
             monitor_idx = find_monitor_for_window(w, self.monitors)
-            if monitor_idx is not None:
-                monitor_label = self.monitor_labels[monitor_idx][1]
-                monitor_tag = f" [{monitor_label}]"
-            else:
-                monitor_tag = " [Nieznany monitor]"
-            self.listbox_windows.insert(tk.END, w.title + monitor_tag)
+            monitor_label = self.monitor_labels[monitor_idx][1] if monitor_idx is not None else "Nieznany monitor"
+
+            self.tree.insert('', 'end', iid=str(idx), values=(w.title, monitor_label))
 
             if selected_hwnd is not None and w._hWnd == selected_hwnd:
                 selected_index = idx
 
         if selected_index is not None:
-            self.listbox_windows.select_set(selected_index)
-            self.listbox_windows.see(selected_index)
+            self.tree.selection_set(str(selected_index))
+            self.tree.see(str(selected_index))
 
     def move_window_to_monitor(self):
-        selection = self.listbox_windows.curselection()
+        selected = self.tree.selection()
         monitor_index = self.monitor_combobox.current()
 
-        if not selection:
+        if not selected:
             messagebox.showwarning("Uwaga", "Wybierz okno.")
             return
         if monitor_index == -1:
             messagebox.showwarning("Uwaga", "Wybierz monitor.")
             return
 
-        selected_window = self.filtered_windows_list[selection[0]]
+        selected_index = int(selected[0])
+        selected_window = self.filtered_windows_list[selected_index]
         selected_monitor = self.monitors[monitor_index]
         selected_hwnd = selected_window._hWnd
 
         try:
+            # Przywróć okno do normalnego rozmiaru
+            selected_window.restore()
+            time.sleep(0.2)
+
+            # Przenieś chwilowo okno lekko poza monitor (10 px na lewo)
+            selected_window.moveTo(selected_monitor.x - 10, selected_monitor.y)
+            time.sleep(0.2)
+
+            # Przenieś na właściwe miejsce
             selected_window.moveTo(selected_monitor.x, selected_monitor.y)
+            time.sleep(0.2)
+
+            # Zmień rozmiar okna na rozmiar monitora
             selected_window.resizeTo(selected_monitor.width, selected_monitor.height)
+            time.sleep(0.2)
+
+            # Aktywuj okno
             selected_window.activate()
+
             self.update_window_list(selected_hwnd)
 
         except Exception as e:
             messagebox.showerror("Błąd", f"Nie udało się przesunąć okna:\n{e}")
 
     def close_window(self):
-        selection = self.listbox_windows.curselection()
+        selected = self.tree.selection()
 
-        if not selection:
+        if not selected:
             messagebox.showwarning("Uwaga", "Wybierz okno do zamknięcia.")
             return
 
-        selected_window = self.filtered_windows_list[selection[0]]
+        selected_index = int(selected[0])
+        selected_window = self.filtered_windows_list[selected_index]
 
         try:
             selected_window.close()
