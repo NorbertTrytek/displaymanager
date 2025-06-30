@@ -1,6 +1,10 @@
 [
     {
-        "url": "test",
+        "url": "testtest",
         "monitor_index": 2
+    },
+    {
+        "url": "test",
+        "monitor_index": 1
     }
 ]
