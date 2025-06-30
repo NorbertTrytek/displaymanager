@@ -1,7 +1,6 @@
 import time
 import tkinter as tk
 from tkinter import ttk, messagebox
-from tkinter import simpledialog
 from screeninfo import get_monitors
 import pygetwindow as gw
 import json
