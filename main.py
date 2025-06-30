@@ -17,12 +17,32 @@ def get_window_titles():
     return [w for w in gw.getAllWindows() if w.title.strip() and w.visible]
 
 
+def rect_intersection_area(r1, r2):
+    # r1, r2 = (x, y, width, height)
+    x1 = max(r1[0], r2[0])
+    y1 = max(r1[1], r2[1])
+    x2 = min(r1[0] + r1[2], r2[0] + r2[2])
+    y2 = min(r1[1] + r1[3], r2[1] + r2[3])
+
+    width = max(0, x2 - x1)
+    height = max(0, y2 - y1)
+    return width * height
+
+
 def find_monitor_for_window(window, monitors):
-    wx, wy = window.left, window.top
+    wx, wy, ww, wh = window.left, window.top, window.width, window.height
+    window_rect = (wx, wy, ww, wh)
+    max_area = 0
+    best_monitor_index = None
+
     for i, m in enumerate(monitors):
-        if (m.x <= wx < m.x + m.width) and (m.y <= wy < m.y + m.height):
-            return i
-    return None
+        monitor_rect = (m.x, m.y, m.width, m.height)
+        area = rect_intersection_area(window_rect, monitor_rect)
+        if area > max_area:
+            max_area = area
+            best_monitor_index = i
+
+    return best_monitor_index
 
 
 class DisplayManagerApp(tk.Tk):
