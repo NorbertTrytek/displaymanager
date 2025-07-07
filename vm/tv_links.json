@@ -1,8 +1,8 @@
 {
-  "tv1": "http://prod-data01.server.lgn2.sprd.net:3000",
-  "tv2": "https://youtube.com",
-  "tv3": "https://twitter.com",
-  "tv4": "https://instagram.com",
-  "tv5": "https://linkedin.com",
+  "tv1": "http://prod-data01.server.lgn2.sprd.net:3000/public-dashboards/ff5f243147c14995af09dd60312488e9",
+  "tv2": "https://example.com",
+  "tv3": "https://example.com",
+  "tv4": "https://example.com",
+  "tv5": "https://example.com",
   "tv6": "https://example.com"
 }

@@ -7,7 +7,6 @@ app = Flask(__name__)
 
 LINKS_FILE = 'tv_links.json'
 
-# Jeśli plik nie istnieje, stwórz go z domyślnymi linkami
 if not os.path.exists(LINKS_FILE):
     default_links = {
         "tv1": "https://www.youtube.com",
@@ -31,7 +30,6 @@ def save_links(links):
 @app.route('/')
 def admin_panel():
     links = load_links()
-    # Prosty formularz HTML do edycji linków
     html = '''
     <h1>Panel admina - ustaw linki dla telewizorów</h1>
     <form method="POST" action="/update_links">
@@ -54,33 +52,35 @@ def update_links():
     save_links(links)
     return 'Linki zostały zaktualizowane! <a href="/">Wróć do panelu admina</a>'
 
+@app.route('/api/links')
+def api_links():
+    return jsonify(load_links())
+
 @app.route('/proxy/<tv_id>')
 def proxy(tv_id):
     links = load_links()
     target_url = links.get(tv_id)
     if not target_url:
-        print(f"TV id '{tv_id}' not found in links")
         return f"TV id '{tv_id}' not found", 404
 
-    print(f"Proxying request for TV '{tv_id}' to URL: {target_url}")
     try:
-        # Tu możesz dodać proxy jeśli potrzebujesz
-        # proxies = {
-        #     "http": "http://proxy:port",
-        #     "https": "http://proxy:port",
-        # }
-        # resp = requests.get(target_url, proxies=proxies, timeout=10)
         resp = requests.get(target_url, timeout=10)
         resp.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching {target_url}: {e}")
         return f"Error fetching {target_url}: {e}", 500
 
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.raw.headers.items()
+    excluded_headers = [
+        'content-encoding',
+        'content-length',
+        'transfer-encoding',
+        'connection',
+        'x-frame-options',
+        'content-security-policy'
+    ]
+
+    headers = [(name, value) for (name, value) in resp.headers.items()
                if name.lower() not in excluded_headers]
 
-    print(f"Successfully fetched content from {target_url}, status code {resp.status_code}")
     return Response(resp.content, resp.status_code, headers)
 
 if __name__ == '__main__':
