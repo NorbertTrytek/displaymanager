@@ -62,7 +62,7 @@ window.addEventListener('keydown', function(e) {
   }
 });
 
-// Auto odświeżanie iframe co 10 sekund
+// Auto odświeżanie iframe co 30 sekund
 const REFRESH_INTERVAL_MS = 10000;
 
 setInterval(function() {
