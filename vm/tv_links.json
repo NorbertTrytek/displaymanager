@@ -1,8 +1,8 @@
 {
-  "tv1": "http://prod-data01.server.lgn2.sprd.net:3000/public-dashboards/ff5f243147c14995af09dd60312488e9",
-  "tv2": "https://example.com",
-  "tv3": "https://example.com",
+  "tv1": "http://prod-data01.server.lgn2.sprd.net:3000",
+  "tv2": "http://prod-data01.server.lgn2.sprd.net:3000",
+  "tv3": "http://prod-data01.server.lgn2.sprd.net:3000/render/d/ff5f243147c14995af09dd60312488e9?orgId=1&width=1920&height=1080&timeout=30s",
   "tv4": "https://example.com",
-  "tv5": "https://example.com",
+  "tv5": "http://prod-data01.server.lgn2.sprd.net:3000/render/d-solo/ff5f243147c14995af09dd60312488e9/panelId=2?orgId=1&width=1000&height=500",
   "tv6": "https://example.com"
 }

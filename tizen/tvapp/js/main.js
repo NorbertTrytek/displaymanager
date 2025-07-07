@@ -10,7 +10,7 @@ var tvIds = [];
 function fetchLinks() {
   fetch(API_URL)
     .then(response => {
-      if (!response.ok) throw new Error(response.statusText);
+      if (!response.ok) { throw new Error(response.statusText); }
       return response.json();
     })
     .then(links => {
@@ -32,7 +32,7 @@ function displayLinks(links) {
   tvIds.forEach(tvId => {
     var btn = document.createElement('button');
     btn.textContent = tvId;
-    btn.onclick = () => loadTv(tvId);
+    btn.onclick = function() { loadTv(tvId); };
     linksContainer.appendChild(btn);
   });
 }
@@ -50,7 +50,7 @@ window.onload = fetchLinks;
 
 // Sterowanie pilotem: lewo/prawo zmienia TV
 window.addEventListener('keydown', function(e) {
-  if (!tvIds.length) return;
+  if (!tvIds.length) { return; }
 
   let currentIndex = tvIds.indexOf(currentTvId);
   if (e.key === 'ArrowRight') {
@@ -62,10 +62,10 @@ window.addEventListener('keydown', function(e) {
   }
 });
 
-//Auto odświeżanie iframe co 10 sekund
+// Auto odświeżanie iframe co 10 sekund
 const REFRESH_INTERVAL_MS = 10000;
 
-setInterval(() => {
+setInterval(function() {
   if (iframe.src && currentTvId) {
     iframe.src = iframe.src;
     console.log('Auto odświeżanie: ' + currentTvId);
