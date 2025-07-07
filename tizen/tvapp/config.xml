@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://yourdomain/BasicProject"
+        version="1.0.2"
+        viewmodes="maximized">
+
+    <tizen:application id="gy2YYrCBGM.BasicProject" package="gy2YYrCBGM" required_version="6.0"/>
+    <content src="index.html"/>
+    <icon src="icon.png"/>
+    <name>BasicProject</name>
+
+    <feature name="http://tizen.org/feature/screen.size.normal.1920.1080"/>
+
+    <!-- Uprawnienia -->
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/network.getstatus"/>
+    <tizen:privilege name="http://tizen.org/privilege/network.get"/>
+
+    <tizen:profile name="tv"/>
+    <tizen:setting screen-orientation="landscape"
+                  context-menu="disable"
+                  background-support="disable"
+                  encryption="disable"
+                  install-location="auto"
+                  hwkey-event="enable"/>
+
+    <access origin="*" subdomains="true"/>
+</widget>

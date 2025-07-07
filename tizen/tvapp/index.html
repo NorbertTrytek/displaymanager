@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <title>TV Link Viewer</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; overflow: hidden; background: black;
+            color: white; font-family: Arial, sans-serif;
+        }
+        #links {
+            position: fixed; top: 0; left: 0; width: 100%; background: #222; padding: 10px;
+            display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;
+        }
+        #links button {
+            background: #444; border: none; color: white; padding: 8px 12px; cursor: pointer;
+            font-size: 14px;
+        }
+        #links button:hover, #links button.active {
+            background: #0a84ff;
+        }
+        #viewer {
+            position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="links">Ładowanie linków...</div>
+    <iframe id="viewer" src=""></iframe>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
