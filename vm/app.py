@@ -14,8 +14,8 @@ SNAPSHOT_DIR = 'snapshots'
 # Tworzymy pliki/katalogi jeśli ich nie ma
 if not os.path.exists(LINKS_FILE):
     default_links = {
-        "tv1": "https://www.example.com",
-        "tv2": "https://www.example.com",
+        "Press": "https://www.example.com",
+        "test": "https://www.example.com",
         "tv3": "https://www.example.com",
         "tv4": "https://www.example.com",
         "tv5": "https://www.example.com",
@@ -73,31 +73,26 @@ def proxy(tv_id):
 
 def take_snapshot(tv_id, url, driver):
     try:
-        # Ustawiamy duże okno na start - ważne dla responsywności stron
-        driver.set_window_size(1920, 1080)
-
         driver.get(url)
-        time.sleep(5)  # czekamy na załadowanie strony
-
-        # Odświeżamy stronę przed snapshotem
+        time.sleep(5)
         driver.refresh()
-        time.sleep(5)  # czekamy po odświeżeniu
+        time.sleep(5)
 
-        # Pobieramy rozmiar całej strony
-        width = driver.execute_script("return Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);")
-        height = driver.execute_script("return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);")
+        # Wymuś dokładnie 1920x1080 przez CDP
+        driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride', {
+            "mobile": False,
+            "width": 1920,
+            "height": 1020,
+            "deviceScaleFactor": 1,
+        })
+        time.sleep(3)  # chwila na przeskalowanie
 
-        # Ustawiamy okno na rozmiar strony
-        driver.set_window_size(width, height)
-        time.sleep(1)  # chwila na przeskalowanie
-
-        # Zapisujemy screenshot
         path = os.path.join(SNAPSHOT_DIR, f"{tv_id}.png")
         driver.save_screenshot(path)
 
-        print(f"Zrobiono snapshot dla {tv_id}")
+        print(f"[{tv_id}] Snapshot zapisany w 1920x1080")
     except Exception as e:
-        print(f"Błąd przy snapshot dla {tv_id}: {e}")
+        print(f"[{tv_id}] Błąd snapshotu: {e}")
 
 def snapshot_worker():
     chrome_options = Options()

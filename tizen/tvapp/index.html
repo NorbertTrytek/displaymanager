@@ -2,30 +2,82 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8" />
-    <title>TV Link Viewer</title>
+    <title>SpreadDisplay – TV Link Viewer</title>
     <style>
-        body, html {
-            margin: 0; padding: 0; overflow: hidden; background: black;
-            color: white; font-family: Arial, sans-serif;
+        * {
+            box-sizing: border-box;
         }
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         #links {
-            position: fixed; top: 0; left: 0; width: 100%; background: #222; padding: 10px;
-            display: flex; gap: 10px; overflow-x: auto; white-space: nowrap;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #1c1c1c;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
         }
+
+        #links img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        #links span {
+            font-weight: bold;
+            font-size: 1.3em;
+            color: #00bcd4;
+            margin-right: 20px;
+        }
+
         #links button {
-            background: #444; border: none; color: white; padding: 8px 12px; cursor: pointer;
-            font-size: 14px;
-        }
-        #links button:hover, #links button.active {
-            background: #0a84ff;
-        }
-        #viewer {
-            position: fixed; top: 50px; left: 0; width: 100%; height: calc(100% - 50px);
+            background: #333;
             border: none;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s ease;
+        }
+
+        #links button:hover {
+            background-color: #008474;
+        }
+
+        #links button.active {
+            background-color: #00b2a5;
+        }
+
+        #viewer {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 60px);
+            border: none;
+            background: #000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
         }
     </style>
 </head>
-<body>
+<body onload="location.reload()">
     <div id="links">Ładowanie linków...</div>
     <iframe id="viewer" src=""></iframe>
 
