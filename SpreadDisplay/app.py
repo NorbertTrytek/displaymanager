@@ -15,8 +15,8 @@ SNAPSHOT_DIR = 'snapshots'
 # Tworzymy pliki/katalogi jeśli ich nie ma
 if not os.path.exists(LINKS_FILE):
     default_links = {
-        "Press": "https://www.example.com",
-        "test": "https://www.example.com",
+        "tv1": "https://www.example.com",
+        "tv2": "https://www.example.com",
         "tv3": "https://www.example.com",
         "tv4": "https://www.example.com",
         "tv5": "https://www.example.com",
