@@ -160,8 +160,8 @@ def delete_monitor():
 def reset_links():
     """Resetowanie linków do wartości domyślnych"""
     default_links = {
-        "Press": "https://www.example.com",
-        "test": "https://www.example.com", 
+        "tv1": "https://www.example.com",
+        "tv2": "https://www.example.com", 
         "tv3": "https://www.example.com",
         "tv4": "https://www.example.com",
         "tv5": "https://www.example.com",
