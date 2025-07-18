@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Panel Administracyjny - Zarządzanie Linkami TV{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3">
+                <i class="fas fa-cogs me-2"></i>Zarządzanie Linkami TV
+            </h1>
+            <div>
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addMonitorModal">
+                    <i class="fas fa-plus me-1"></i>Dodaj Monitor
+                </button>
+                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#resetModal">
+                    <i class="fas fa-undo me-1"></i>Resetuj
+                </button>
+                <button type="button" class="btn btn-outline-info" onclick="refreshLinks()">
+                    <i class="fas fa-sync-alt me-1"></i>Odśwież
+                </button>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Łącznie Linki</h6>
+                                <h3 class="mb-0">{{ links|length }}</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-tv fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Aktywne Linki</h6>
+                                <h3 class="mb-0" id="activeLinks">{{ links|length }}</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-link fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Status</h6>
+                                <h5 class="mb-0">
+                                    <i class="fas fa-circle text-success me-1"></i>Online
+                                </h5>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-server fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Links Management Form -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-edit me-2"></i>Edycja Linków
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_links') }}" id="linksForm">
+                    <div class="row">
+                        {% for tv, url in links.items() %}
+                        <div class="col-md-6 mb-3" id="monitor-{{ tv }}">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label for="{{ tv }}" class="form-label mb-0">
+                                            <i class="fas fa-television me-2"></i>
+                                            <span id="name-{{ tv }}">{{ tv }}</span>
+                                        </label>
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item" href="#" onclick="renameMonitor('{{ tv }}')">
+                                                        <i class="fas fa-edit me-2"></i>Zmień nazwę
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="#" onclick="deleteMonitor('{{ tv }}')">
+                                                        <i class="fas fa-trash me-2"></i>Usuń monitor
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="url" 
+                                               class="form-control" 
+                                               id="{{ tv }}" 
+                                               name="{{ tv }}" 
+                                               value="{{ url }}" 
+                                               placeholder="https://example.com"
+                                               required>
+                                        <button class="btn btn-outline-secondary" 
+                                                type="button" 
+                                                onclick="validateUrl('{{ tv }}')">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-outline-info" 
+                                                type="button" 
+                                                onclick="previewUrl('{{ url }}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback" id="{{ tv }}_feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Zapisz Zmiany
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-lg ms-2" onclick="resetForm()">
+                            <i class="fas fa-times me-2"></i>Anuluj
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div class="modal fade" id="resetModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Potwierdzenie Resetowania
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Czy na pewno chcesz zresetować wszystkie linki do wartości domyślnych?</p>
+                <p class="text-warning">
+                    <i class="fas fa-warning me-1"></i>
+                    <strong>Ta operacja jest nieodwracalna!</strong>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Anuluj
+                </button>
+                <form method="POST" action="{{ url_for('reset_links') }}" class="d-inline">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-undo me-1"></i>Resetuj
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-eye me-2"></i>Podgląd Strony
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="previewFrame" width="100%" height="400" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Monitor Modal -->
+<div class="modal fade" id="addMonitorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Dodaj Nowy Monitor
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addMonitorForm">
+                    <div class="mb-3">
+                        <label for="newMonitorName" class="form-label">Nazwa monitora</label>
+                        <input type="text" class="form-control" id="newMonitorName" 
+                               placeholder="np. TV7, Monitor1" required>
+                        <div class="invalid-feedback" id="newMonitorName_feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newMonitorUrl" class="form-label">URL</label>
+                        <input type="url" class="form-control" id="newMonitorUrl" 
+                               value="https://www.example.com" placeholder="https://example.com" required>
+                        <div class="invalid-feedback" id="newMonitorUrl_feedback"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Anuluj
+                </button>
+                <button type="button" class="btn btn-success" onclick="addMonitor()">
+                    <i class="fas fa-plus me-1"></i>Dodaj Monitor
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rename Monitor Modal -->
+<div class="modal fade" id="renameMonitorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Zmień Nazwę Monitora
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="renameMonitorForm">
+                    <div class="mb-3">
+                        <label for="currentMonitorName" class="form-label">Aktualna nazwa</label>
+                        <input type="text" class="form-control" id="currentMonitorName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newMonitorNameEdit" class="form-label">Nowa nazwa</label>
+                        <input type="text" class="form-control" id="newMonitorNameEdit" 
+                               placeholder="Wprowadź nową nazwę" required>
+                        <div class="invalid-feedback" id="newMonitorNameEdit_feedback"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Anuluj
+                </button>
+                <button type="button" class="btn btn-primary" onclick="confirmRename()">
+                    <i class="fas fa-save me-1"></i>Zapisz Zmiany
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteMonitorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Potwierdzenie Usunięcia
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Czy na pewno chcesz usunąć monitor <strong id="deleteMonitorName"></strong>?</p>
+                <p class="text-warning">
+                    <i class="fas fa-warning me-1"></i>
+                    <strong>Ta operacja jest nieodwracalna!</strong> Wszystkie dane tego monitora zostaną utracone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Anuluj
+                </button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash me-1"></i>Usuń Monitor
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+});
+
+// Auto-hide alerts after 5 seconds
+setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        const bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+    });
+}, 5000);
+</script>
+{% endblock %}

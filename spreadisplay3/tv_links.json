@@ -1,0 +1,8 @@
+{
+  "tv1": "http://prod-data01.server.lgn2.sprd.net:3000/d/beqekfql0piwwb/putwall-overview?orgId=1&from=now-24h&to=now&timezone=browser&var-probe=15&refresh=auto&kiosk",
+  "tv2": "https://www.example.com",
+  "tv3": "https://www.example.com",
+  "tv4": "https://www.example.com",
+  "tv5": "https://www.example.com",
+  "tv6": "https://www.example.com"
+}
