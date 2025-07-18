@@ -77,33 +77,38 @@ def rename_monitor():
     data = request.get_json()
     old_name = data.get('old_name')
     new_name = data.get('new_name')
-    
+
     if not old_name or not new_name:
         return jsonify({'success': False, 'message': 'Brak wymaganych danych'})
-    
+
     if old_name == new_name:
         return jsonify({'success': False, 'message': 'Nowa nazwa jest taka sama jak stara'})
-    
+
     links = load_links()
-    
+
     if old_name not in links:
         return jsonify({'success': False, 'message': 'Monitor o tej nazwie nie istnieje'})
-    
+
     if new_name in links:
         return jsonify({'success': False, 'message': 'Monitor o tej nazwie już istnieje'})
-    
+
     # Przemianuj monitor
     links[new_name] = links[old_name]
     del links[old_name]
     save_links(links)
-    
-    # Przemianuj plik snapshot jeśli istnieje
+
+    # ⬇️ TEN blok musi być wewnątrz funkcji!
     old_snapshot = os.path.join(SNAPSHOT_DIR, f'{old_name}.png')
     new_snapshot = os.path.join(SNAPSHOT_DIR, f'{new_name}.png')
-    
+
     if os.path.exists(old_snapshot):
         os.rename(old_snapshot, new_snapshot)
-    
+    else:
+        time.sleep(0.1)
+        snapshot_path = os.path.join(SNAPSHOT_DIR, f"{old_name}.png")
+        if os.path.exists(snapshot_path):
+            os.remove(snapshot_path)
+
     return jsonify({'success': True, 'message': f'Monitor "{old_name}" został przemianowany na "{new_name}"'})
 
 @app.route('/add_monitor', methods=['POST'])
